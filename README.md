@@ -1,7 +1,6 @@
 # make_help_menu
 
-This is a single R function in a file named make_help_menu.R that you can copy and include into any R package you are contributing to.  
-The function was an idea by Theodor Stenevang Klemming in 2017 who also wrote version published here on github.com/stenevang/make_help_menu/
+This is a single R function in a file named make_help_menu.R that you can copy and include into any R package you are contributing to. The function was an idea by Theodor Stenevang Klemming in 2017 who also wrote the version published here on https://github.com/stenevang/make_help_menu/
 
 
 ### Result
