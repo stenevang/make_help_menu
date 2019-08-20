@@ -1,24 +1,21 @@
 # Automatically generate a package help menu
 #
 # Based on .Rd files found in the /man/ folder of the package source,
-# this function will generate a .R-file named like the package, with roxygen 
-# notation that links to all files found in the /man/ folder. The effect is 
-# that package users will get a menu to all help documentation in the package by
-# typing ?<package> \cr
-# The function \code{make_help_menu} is general and can be moved into any 
-# package without modification.\cr
+# this function will generate a .R-file named like the package, with roxygen notation that
+# links to all files found in the /man/ folder. The effect is that package users
+# will get a menu to all help documentation in the package by typing ?<package> \cr
+# The function \code{make_help_menu} is general and can be moved into any package
+# without modification.\cr
 # WARNING! \code{make_help_menu} will generate a file named like <package>.R and
-# therefore you MUST NOT put any of the package source in a file named like 
-# that.\cr
-# The function is not exported since it is meant to be used by package 
-# developers only.
+# therefore you MUST NOT put any of the package source in a file named like that.\cr
+# The function is not exported since it is meant to be used by package developers only.
 #
 # @param man_dir The path to the /man/ directory where .Rd files can be listed.
 # Default assumes the current working directory is the root of the package
 # source, and specifies the /man/ subdirectory.
-# @param R_dir The path to the /R/ directory where <package>.R can be saved. 
-# Default assumes the current working directory is the root of the package 
-# source, and specifies the /R/ subdirectory.
+# @param R_dir The path to the /R/ directory where <package>.R can be saved. Default
+# assumes the current working directory is the root of the package source,
+# and specifies the /R/ subdirectory.
 #
 # @examples
 #
@@ -28,14 +25,17 @@
 # # where you replace <package> with the name of your package
 # # then do ctrl+shift+B or re-install the package some other way
 
-make_help_menu <- function(man_dir = "man", R_dir = "R") {
+make_help_menu <- function(man_dir = "man",
+                           R_dir = "R",
+                           except = c("your_own_exception", "another_of_your_exceptions")) {
   devtools::document()
 
   package_name <- environmentName(environment(make_help_menu))
   message(paste("Package name is:", package_name))
   helpfiles <- list.files(man_dir)
   helpfiles <- gsub("\\.Rd$", "", helpfiles)
-  helpfiles <- helpfiles[helpfiles != package_name] 
+  helpfiles <- helpfiles[!(helpfiles %in% except )]
+  helpfiles <- helpfiles[helpfiles != package_name]
   helpfiles <- paste0("#' \\code{\\link{", helpfiles, "}}\\cr")
   header <- c(paste0("#' ", package_name, " package help menu"),
               "#' ",
@@ -47,16 +47,14 @@ make_help_menu <- function(man_dir = "man", R_dir = "R") {
               "#' @docType package",
               paste0("#' @name ", package_name),
               "#' @encoding UTF-8",
-              "NULL")
-  package_R <- data.frame(file = c(header, helpfiles, footer),
-                          stringsAsFactors = F)
+              "#' @export",
+              paste0(package_name," <- function() {?", package_name, "}"))
+  package_R <- data.frame(file = c(header, helpfiles, footer), stringsAsFactors = F)
 
-  # safety check
+  # security check
   answer <- "empty"
   while (!(answer %in% c("yes", "no")) ) {
-    answer <- readline(paste0("WARNING! This will overwrite the file ",
-                              package_name,
-                              ".R - Continue? (yes / no) ") )
+    answer <- readline(paste0("WARNING! This will overwrite the file ", package_name, ".R - Continue? (yes / no) ") )
   }
   if (answer == "no") {
     message("OK, bye.")
@@ -71,12 +69,7 @@ make_help_menu <- function(man_dir = "man", R_dir = "R") {
                 row.names = F,
                 col.names = F)
     devtools::document()
-    message(paste0(package_name,
-                   ".R and ?",
-                   package_name,
-                   " (",
-                   package_name,
-                   ".Rd) upated") )
+    message(paste0(package_name, ".R and ?", package_name, " (", package_name, ".Rd) upated") )
     return(TRUE)
   } else {
     return(FALSE)
